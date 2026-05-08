@@ -143,3 +143,7 @@ This project was built for the [Google Cloud Rapid Agent Hackathon](https://rapi
 ## License
 
 MIT License.
+
+---
+
+*Built for the hackathon: DataPilot team 🚀*
