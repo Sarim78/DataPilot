@@ -142,4 +142,4 @@ This project was built for the [Google Cloud Rapid Agent Hackathon](https://rapi
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
+MIT License.
