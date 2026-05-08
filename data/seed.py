@@ -25,9 +25,7 @@ load_dotenv(ROOT / ".env")
 from bson import ObjectId  # noqa: E402
 from pymongo import MongoClient  # noqa: E402
 
-COL_PIPELINES = "pipelines"
-COL_RUNS = "pipeline_runs"
-COL_REPORTS = "incident_reports"
+from db.mongo import COL_PIPELINES, COL_REPORTS, COL_RUNS  # noqa: E402
 
 
 def _utcnow() -> datetime:

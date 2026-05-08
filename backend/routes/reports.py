@@ -14,11 +14,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from pymongo.database import Database
 
-from routes.pipelines import COL_PIPELINES, COL_RUNS, RunStatus, get_mongo_db
+from db.mongo import COL_PIPELINES, COL_REPORTS, COL_RUNS
+from routes.pipelines import RunStatus, get_mongo_db
 
 router = APIRouter()
-
-COL_REPORTS = "incident_reports"
 
 
 class ReportSeverity(str, Enum):

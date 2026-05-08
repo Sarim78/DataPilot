@@ -1,7 +1,7 @@
 """
 REST endpoints for pipelines and their runs.
 
-Uses `request.app.state.db` (set in `main.lifespan`). Collection names match `main.ensure_indexes` / `data/seed.py`.
+Uses `request.app.state.db` (set in `main.lifespan`). Collection names come from `db.mongo` (same as `data/seed.py`).
 """
 
 from __future__ import annotations
@@ -17,11 +17,9 @@ from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 from pymongo.database import Database
 
-router = APIRouter()
+from db.mongo import COL_PIPELINES, COL_REPORTS, COL_RUNS
 
-COL_PIPELINES = "pipelines"
-COL_RUNS = "pipeline_runs"
-COL_REPORTS = "incident_reports"
+router = APIRouter()
 
 
 # --- enums & models (Week 1; keep aligned with agent / future frontend) ---

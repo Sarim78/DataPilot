@@ -20,8 +20,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import MongoClient
-from pymongo.database import Database
 
+from db.mongo import ensure_indexes
 from routes import pipelines, reports
 
 
@@ -36,20 +36,6 @@ class Settings(BaseSettings):
 
     mongodb_uri: str
     mongodb_db_name: str = "datapilot"
-
-
-# Collection names (keep in sync with routes + data/seed.py)
-COL_PIPELINES = "pipelines"
-COL_RUNS = "pipeline_runs"
-COL_REPORTS = "incident_reports"
-
-
-def ensure_indexes(db: Database[Any]) -> None:
-    """Idempotent indexes for local dev."""
-    db[COL_PIPELINES].create_index("name", unique=True)
-    db[COL_RUNS].create_index([("pipeline_id", 1), ("started_at", -1)])
-    db[COL_REPORTS].create_index([("pipeline_id", 1), ("created_at", -1)])
-    db[COL_REPORTS].create_index("run_id", unique=True, sparse=True)
 
 
 @asynccontextmanager
