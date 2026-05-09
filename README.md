@@ -5,7 +5,7 @@
 Datapilot is an AI-powered data pipeline monitoring agent. It watches your ETL pipelines, detects failures and anomalies, and automatically generates incident reports all powered by Gemini and Google Cloud Agent Builder with MongoDB as the data backbone.
 
 ---
-> Still Work In Progress...
+>🔴 Work In Progress 
 ---
 
 ## What It Does
