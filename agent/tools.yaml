@@ -1,0 +1,16 @@
+tools:
+  - name: check_pipeline_health
+    description: Check the health status of a specific pipeline
+    endpoint: /api/pipelines/{pipeline_id}/health
+
+  - name: list_recent_failures
+    description: List all pipeline failures in the last 24 hours
+    endpoint: /api/pipelines/failures/recent
+
+  - name: generate_incident_report
+    description: Generate an incident report for a failed pipeline
+    endpoint: /api/reports/generate_from_failures/{pipeline_id}
+
+  - name: list_pipelines
+    description: List all registered pipelines and their current status
+    endpoint: /api/pipelines

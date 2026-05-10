@@ -1,0 +1,9 @@
+name: datapilot
+display_name: Datapilot
+description: AI-powered data pipeline monitoring agent
+model: gemini-2.0-flash
+system_prompt_file: prompts/system.txt
+tools:
+  - type: mcp
+    name: mongodb
+    server_url: ${MONGODB_URI}
