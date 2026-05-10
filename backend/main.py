@@ -18,6 +18,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import MongoClient
 
@@ -67,6 +68,29 @@ app.add_middleware(
 
 app.include_router(pipelines.router, prefix="/api/pipelines", tags=["pipelines"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
+
+
+class AgentMessage(BaseModel):
+    message: str = Field(..., min_length=1, max_length=8000)
+
+
+class AgentReply(BaseModel):
+    reply: str
+
+
+@app.post("/api/agent", response_model=AgentReply, tags=["agent"])
+def agent_stub(body: AgentMessage) -> AgentReply:
+    """Temporary stub until the ADK agent is wired to HTTP."""
+    snippet = body.message.strip()
+    if len(snippet) > 280:
+        snippet = snippet[:277] + "…"
+    return AgentReply(
+        reply=(
+            "Datapilot agent (stub): received your message. "
+            f"When the live agent is connected, I will answer about pipelines and incidents. "
+            f"You asked: {snippet!r}"
+        )
+    )
 
 
 @app.get("/health")
