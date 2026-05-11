@@ -52,7 +52,7 @@ export default function LandingPage() {
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-[#a1a1aa] sm:text-lg">
             Datapilot watches your ETL pipelines, detects failures, and takes
-            action — powered by Gemini and MongoDB.
+            action - powered by Gemini and MongoDB.
           </p>
           <div className="mt-10 flex items-center gap-4">
             <Link
