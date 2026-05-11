@@ -14,9 +14,9 @@ export interface ChatMessage {
 const STARTERS = [
   "List all pipelines",
   "Show me recent failures",
-  "Generate an incident report for CreditStream",
+  "Generate a report for CreditStream",
   "What failed last night?",
-];
+] as const;
 
 function extractReply(json: unknown): string | null {
   if (typeof json !== "object" || json === null) return null;
@@ -119,7 +119,9 @@ export function AgentChat({ apiBase }: { apiBase: string }) {
         setMessages((m) => [...m, assistantMsg]);
       } catch (e) {
         setError(
-          e instanceof Error ? e.message : "Network error while contacting agent.",
+          e instanceof Error
+            ? e.message
+            : "Network error while contacting agent.",
         );
         const assistantMsg: ChatMessage = {
           id: crypto.randomUUID(),
@@ -145,114 +147,104 @@ export function AgentChat({ apiBase }: { apiBase: string }) {
   const showStarters = messages.length === 0;
 
   return (
-    <div className="flex h-[calc(100vh-8.5rem)] min-h-[420px] flex-col rounded-xl border border-white/[0.06] bg-surface-raised/60 shadow-ring">
-      <div className="border-b border-white/[0.06] px-5 py-4">
-        <h2 className="text-sm font-semibold text-white">Agent</h2>
-        <p className="mt-0.5 text-xs text-neutral-500">
-          Ask about pipelines, failures, and incident reports.
-        </p>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
-        {error ? (
-          <div className="mb-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-200/90">
+    <div className="flex h-full flex-col">
+      <div className="flex-1 overflow-y-auto px-6 py-6">
+        {error && (
+          <div className="mb-4 rounded-[6px] border border-[#f59e0b]/25 bg-[#f59e0b]/10 px-3 py-2 text-xs text-[#f59e0b]">
             {error}
           </div>
-        ) : null}
+        )}
 
-        {showStarters ? (
-          <div className="mb-6">
-            <p className="text-xs text-neutral-500">Suggested prompts</p>
-            <div className="mt-2 flex flex-wrap gap-2">
+        {showStarters && (
+          <div className="flex h-full flex-col items-center justify-center">
+            <p className="text-sm text-[#52525b]">Suggested prompts</p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
               {STARTERS.map((q) => (
                 <button
                   key={q}
                   type="button"
                   disabled={loading}
                   onClick={() => void send(q)}
-                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-left text-xs text-neutral-300 transition-colors hover:border-accent/35 hover:bg-accent/10 hover:text-white disabled:opacity-50"
+                  className="rounded-[6px] border border-[#27272a] bg-[#111111] px-4 py-2 text-sm text-[#a1a1aa] transition-colors duration-150 hover:border-[#3f3f46] hover:text-white disabled:opacity-50"
                 >
                   {q}
                 </button>
               ))}
             </div>
           </div>
-        ) : null}
+        )}
 
-        <ul className="space-y-4">
-          {messages.map((m) => (
-            <li
-              key={m.id}
-              className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-            >
-              {m.role === "assistant" ? (
-                <div
-                  className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-gradient-to-br from-accent/20 to-transparent text-[10px] font-bold text-accent"
-                  aria-hidden
-                >
-                  DP
-                </div>
-              ) : (
-                <div
-                  className="mt-0.5 h-8 w-8 shrink-0 rounded-lg border border-white/[0.08] bg-white/[0.06]"
-                  aria-hidden
-                />
-              )}
-              <div
-                className={`max-w-[min(100%,36rem)] ${m.role === "user" ? "items-end" : "items-start"} flex flex-col gap-1`}
+        {!showStarters && (
+          <ul className="space-y-4">
+            {messages.map((m) => (
+              <li
+                key={m.id}
+                className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
+                {m.role === "assistant" && (
+                  <div
+                    className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] border border-[#27272a] bg-[#1a1a1a] text-[10px] font-bold text-[#3b82f6]"
+                    aria-hidden
+                  >
+                    D
+                  </div>
+                )}
                 <div
-                  className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed transition-colors ${
-                    m.role === "user"
-                      ? "rounded-tr-md border border-accent/25 bg-accent/15 text-neutral-100"
-                      : "rounded-tl-md border border-white/[0.06] bg-[#121212] text-neutral-200"
-                  }`}
+                  className={`flex max-w-[min(100%,32rem)] flex-col gap-1 ${m.role === "user" ? "items-end" : "items-start"}`}
                 >
-                  <p className="whitespace-pre-wrap">{m.content}</p>
+                  <div
+                    className={`rounded-[8px] px-4 py-2.5 text-sm leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-[#3b82f6] text-white"
+                        : "border border-[#27272a] bg-[#111111] text-[#a1a1aa]"
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap">{m.content}</p>
+                  </div>
+                  <span className="px-1 text-[10px] text-[#52525b]">
+                    {formatTime(m.createdAt)}
+                  </span>
                 </div>
-                <span className="px-1 text-[10px] text-neutral-600">
-                  {formatTime(m.createdAt)}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
 
-        {loading ? (
-          <div className="mt-4 flex items-center gap-3 pl-11">
+        {loading && (
+          <div className="mt-4 flex items-center gap-3">
             <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-gradient-to-br from-accent/20 to-transparent text-[10px] font-bold text-accent"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] border border-[#27272a] bg-[#1a1a1a] text-[10px] font-bold text-[#3b82f6]"
               aria-hidden
             >
-              DP
+              D
             </div>
-            <div className="flex items-center gap-1 rounded-2xl rounded-tl-md border border-white/[0.06] bg-[#121212] px-4 py-3">
+            <div className="flex items-center gap-1 rounded-[8px] border border-[#27272a] bg-[#111111] px-4 py-3">
               <span className="sr-only">Agent is typing</span>
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.3s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-neutral-500 [animation-delay:-0.15s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-neutral-500" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#52525b] [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#52525b] [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#52525b]" />
             </div>
           </div>
-        ) : null}
+        )}
         <div ref={endRef} />
       </div>
 
       <form
         onSubmit={onSubmit}
-        className="border-t border-white/[0.06] p-4 sm:p-5"
+        className="border-t border-[#27272a] bg-[#0a0a0a] px-6 py-4"
       >
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Message Datapilot…"
+            placeholder="Message Datapilot..."
             disabled={loading}
-            className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-4 py-2.5 text-sm text-white outline-none ring-accent/40 transition-[border,box-shadow] placeholder:text-neutral-600 focus:border-accent/40 focus:ring-2 disabled:opacity-50"
+            className="min-w-0 flex-1 rounded-[6px] border border-[#27272a] bg-[#111111] px-4 py-2.5 text-sm text-white outline-none transition-colors duration-150 placeholder:text-[#52525b] focus:border-[#3f3f46] disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="shrink-0 rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="shrink-0 rounded-[6px] bg-[#3b82f6] px-4 py-2.5 text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Send
           </button>

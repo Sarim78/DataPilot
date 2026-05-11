@@ -11,5 +11,10 @@ body {
 }
 
 ::selection {
-  @apply bg-accent/30 text-white;
+  @apply bg-[#3b82f6]/30 text-white;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
 }

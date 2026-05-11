@@ -39,9 +39,9 @@ export interface PipelineHealth {
 }
 
 function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "\u2014";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "\u2014";
   return new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
@@ -62,7 +62,11 @@ async function readErrorMessage(res: Response): Promise<string> {
     if (typeof j.detail === "string") return j.detail;
     if (Array.isArray(j.detail)) {
       return j.detail
-        .map((e) => (typeof e === "object" && e && "msg" in e ? String((e as { msg: string }).msg) : String(e)))
+        .map((e) =>
+          typeof e === "object" && e && "msg" in e
+            ? String((e as { msg: string }).msg)
+            : String(e),
+        )
         .join("; ");
     }
   } catch {
@@ -91,8 +95,7 @@ export function PipelineCard({
 
   const dashStatus = displayStatusFromHealth(health);
   const lastRun = health.last_run;
-  const lastAt =
-    lastRun?.finished_at ?? lastRun?.started_at ?? null;
+  const lastAt = lastRun?.finished_at ?? lastRun?.started_at ?? null;
   const rows = lastRun?.rows_processed;
   const isFailed = dashStatus === "failed";
 
@@ -150,118 +153,115 @@ export function PipelineCard({
   };
 
   return (
-    <article className="group rounded-xl border border-white/[0.06] bg-surface-raised/80 transition-all duration-200 hover:border-white/[0.1]">
+    <article className="rounded-[8px] border border-[#27272a] bg-[#111111] transition-colors duration-150 hover:border-[#3f3f46]">
       <div className="p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold tracking-tight text-white">
+            <h3 className="truncate text-sm font-semibold text-white">
               {pipeline.name}
             </h3>
-            {pipeline.owner ? (
-              <p className="mt-0.5 truncate text-xs text-neutral-500">
+            {pipeline.owner && (
+              <p className="mt-0.5 truncate text-xs text-[#52525b]">
                 {pipeline.owner}
               </p>
-            ) : null}
+            )}
           </div>
           <StatusBadge status={dashStatus} />
         </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
           <div>
-            <dt className="text-neutral-500">Last run</dt>
-            <dd className="mt-0.5 font-medium text-neutral-200">
+            <dt className="text-[#52525b]">Last run</dt>
+            <dd className="mt-0.5 font-medium text-[#a1a1aa]">
               {formatDateTime(lastAt)}
             </dd>
           </div>
           <div>
-            <dt className="text-neutral-500">Records</dt>
-            <dd className="mt-0.5 font-medium text-neutral-200">
+            <dt className="text-[#52525b]">Records</dt>
+            <dd className="mt-0.5 font-medium text-[#a1a1aa]">
               {rows !== null && rows !== undefined
                 ? rows.toLocaleString()
-                : "—"}
+                : "\u2014"}
             </dd>
           </div>
           <div className="col-span-2 sm:col-span-1">
-            <dt className="text-neutral-500">Health</dt>
-            <dd className="mt-0.5 font-medium capitalize text-neutral-300">
+            <dt className="text-[#52525b]">Health</dt>
+            <dd className="mt-0.5 font-medium capitalize text-[#a1a1aa]">
               {health.health}
             </dd>
           </div>
         </dl>
 
-        {isFailed && lastRun?.error_message ? (
-          <div className="mt-4 rounded-lg border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-rose-400/90">
+        {isFailed && lastRun?.error_message && (
+          <div className="mt-4 rounded-[6px] border border-[#ef4444]/20 bg-[#ef4444]/[0.06] px-3 py-2">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[#ef4444]/80">
               Error
             </p>
-            <p className="mt-1 text-xs leading-relaxed text-rose-100/80">
+            <p className="mt-1 text-xs leading-relaxed text-[#ef4444]/70">
               {lastRun.error_message}
             </p>
           </div>
-        ) : null}
+        )}
 
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={toggleHistory}
-            className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
+            className="rounded-[6px] border border-[#27272a] px-3 py-1.5 text-xs font-medium text-[#a1a1aa] transition-colors duration-150 hover:border-[#3f3f46] hover:text-white"
           >
-            {historyOpen ? "Hide run history" : "View run history"}
+            {historyOpen ? "Hide Runs" : "View Runs"}
           </button>
-          <button
-            type="button"
-            disabled={!isFailed || reportLoading}
-            onClick={() => void generateReport()}
-            className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/15 disabled:cursor-not-allowed disabled:border-white/[0.06] disabled:bg-transparent disabled:text-neutral-600"
-          >
-            {reportLoading ? "Working…" : "Incident report"}
-          </button>
+          {isFailed && (
+            <button
+              type="button"
+              disabled={reportLoading}
+              onClick={() => void generateReport()}
+              className="rounded-[6px] border border-[#3b82f6]/40 bg-[#3b82f6]/10 px-3 py-1.5 text-xs font-medium text-[#3b82f6] transition-colors duration-150 hover:bg-[#3b82f6]/15 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {reportLoading ? "Working..." : "Generate Report"}
+            </button>
+          )}
         </div>
-        {!isFailed ? (
-          <p className="mt-2 text-[11px] text-neutral-600">
-            Incident reports are available when the latest run has failed.
-          </p>
-        ) : null}
-        {reportFeedback ? (
-          <p className="mt-2 text-xs text-neutral-400">{reportFeedback}</p>
-        ) : null}
+        {reportFeedback && (
+          <p className="mt-2 text-xs text-[#a1a1aa]">{reportFeedback}</p>
+        )}
       </div>
 
-      {historyOpen ? (
-        <div className="border-t border-white/[0.06] bg-[#0d0d0d] px-5 py-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+      {historyOpen && (
+        <div className="border-t border-[#27272a] bg-[#0a0a0a] px-5 py-4">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-[#52525b]">
             Run history
           </p>
           {runsLoading ? (
-            <p className="mt-3 text-sm text-neutral-500">Loading runs…</p>
+            <p className="mt-3 text-sm text-[#52525b]">Loading runs...</p>
           ) : runsError ? (
-            <p className="mt-3 text-sm text-rose-400">{runsError}</p>
+            <p className="mt-3 text-sm text-[#ef4444]">{runsError}</p>
           ) : runs && runs.length > 0 ? (
-            <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
+            <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto">
               {runs.map((r) => (
                 <li
                   key={r.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.05] bg-white/[0.02] px-3 py-2 text-xs"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-[6px] border border-[#27272a] bg-[#111111] px-3 py-2 text-xs"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <StatusBadge status={mapBackendRunStatus(r.status)} />
-                    <span className="text-neutral-500">
+                    <span className="text-[#52525b]">
                       {formatDateTime(r.started_at ?? r.finished_at)}
                     </span>
                   </div>
-                  <span className="text-neutral-400">
+                  <span className="text-[#a1a1aa]">
                     {r.rows_processed !== null && r.rows_processed !== undefined
                       ? `${r.rows_processed.toLocaleString()} rows`
-                      : "—"}
+                      : "\u2014"}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-neutral-500">No runs recorded.</p>
+            <p className="mt-3 text-sm text-[#52525b]">No runs recorded.</p>
           )}
         </div>
-      ) : null}
+      )}
     </article>
   );
 }
