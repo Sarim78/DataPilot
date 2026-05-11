@@ -1,5 +1,27 @@
 import Link from "next/link";
 
+const featureIcons: Record<string, React.ReactNode> = {
+  "Real-time Monitoring": (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="1,12 5,12 7,6 10,16 13,8 15,12 19,12" stroke="#3b82f6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  ),
+  "AI-Powered Diagnosis": (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 1l2.1 4.3 4.9.7-3.5 3.4.8 4.6L10 11.8 5.7 14l.8-4.6L3 6l4.9-.7L10 1z" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="10" cy="16.5" r="1.5" stroke="#3b82f6" strokeWidth="1.2" fill="none" />
+    </svg>
+  ),
+  "Instant Reports": (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 1H4.5A1.5 1.5 0 003 2.5v15A1.5 1.5 0 004.5 19h11a1.5 1.5 0 001.5-1.5V6L12 1z" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <polyline points="12,1 12,6 17,6" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <line x1="7" y1="10" x2="13" y2="10" stroke="#3b82f6" strokeWidth="1.3" strokeLinecap="round" />
+      <line x1="7" y1="13" x2="11" y2="13" stroke="#3b82f6" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  ),
+};
+
 const features = [
   {
     title: "Real-time Monitoring",
@@ -29,13 +51,13 @@ export default function LandingPage() {
           <nav className="flex items-center gap-6">
             <Link
               href="/dashboard"
-              className="text-sm text-[#a1a1aa] transition-colors duration-150 hover:text-white"
+              className="text-sm text-[#a1a1aa] transition-all duration-150 hover:text-white hover:underline hover:underline-offset-4"
             >
               Dashboard
             </Link>
             <Link
               href="/agent"
-              className="text-sm text-[#a1a1aa] transition-colors duration-150 hover:text-white"
+              className="text-sm text-[#a1a1aa] transition-all duration-150 hover:text-white hover:underline hover:underline-offset-4"
             >
               Agent
             </Link>
@@ -43,7 +65,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex min-h-screen flex-col items-center justify-center px-6 pt-14">
+      <main className="flex flex-col items-center px-6 pt-32 pb-16">
         <section className="flex max-w-3xl flex-col items-center text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Your pipelines.
@@ -71,13 +93,14 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <section className="border-t border-[#27272a] bg-[#0a0a0a] px-6 py-24">
+      <section className="border-t border-[#27272a] bg-[#0a0a0a] px-6 py-16">
         <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
           {features.map((f) => (
             <div
               key={f.title}
               className="rounded-[8px] border border-[#27272a] bg-[#111111] p-6 transition-colors duration-150 hover:border-[#3f3f46]"
             >
+              <div className="mb-3">{featureIcons[f.title]}</div>
               <h3 className="text-sm font-semibold text-white">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-[#a1a1aa]">
                 {f.description}
