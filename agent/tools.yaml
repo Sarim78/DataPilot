@@ -1,16 +1,22 @@
+# Optional REST tools (Datapilot FastAPI backend). The live agent uses MongoDB MCP
+# in agent.py; use these paths only if you wire HTTP tools later.
 tools:
-  - name: check_pipeline_health
-    description: Check the health status of a specific pipeline
-    endpoint: /api/pipelines/{pipeline_id}/health
-
-  - name: list_recent_failures
-    description: List all pipeline failures in the last 24 hours
-    endpoint: /api/pipelines/failures/recent
-
-  - name: generate_incident_report
-    description: Generate an incident report for a failed pipeline
-    endpoint: /api/reports/generate_from_failures/{pipeline_id}
-
   - name: list_pipelines
-    description: List all registered pipelines and their current status
-    endpoint: /api/pipelines
+    description: List all registered pipelines
+    endpoint: GET /api/pipelines
+
+  - name: check_pipeline_health
+    description: Health summary for one pipeline (last run, failure count in window)
+    endpoint: GET /api/pipelines/{pipeline_id}/health
+
+  - name: list_pipeline_runs
+    description: Recent runs for a pipeline (status, errors, timestamps)
+    endpoint: GET /api/pipelines/{pipeline_id}/runs
+
+  - name: list_incident_reports
+    description: List incident reports, optionally filtered by pipeline
+    endpoint: GET /api/reports
+
+  - name: generate_incident_reports
+    description: Create incident reports for recent failed runs without a report
+    endpoint: POST /api/reports/generate-from-failures/{pipeline_id}

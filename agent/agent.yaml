@@ -1,9 +1,18 @@
 name: datapilot
 display_name: Datapilot
 description: AI-powered data pipeline monitoring agent
-model: gemini-2.0-flash
+# Vertex: gemini-2.5-flash (or set GEMINI_MODEL). AI Studio: gemini-2.0-flash works well.
+model: gemini-2.5-flash
 system_prompt_file: prompts/system.txt
+# Auth (see agent.py): GOOGLE_GENAI_USE_VERTEXAI, GOOGLE_CLOUD_PROJECT,
+# GOOGLE_CLOUD_LOCATION, GOOGLE_GENAI_API_KEY (Express), or GOOGLE_API_KEY (AI Studio).
 tools:
   - type: mcp
     name: mongodb
-    server_url: ${MONGODB_URI}
+    transport: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@mongodb-js/mongodb-mcp-server"
+      - "--connectionString"
+      - "${MONGODB_URI}"
