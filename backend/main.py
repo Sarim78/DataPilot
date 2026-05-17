@@ -13,42 +13,64 @@ Environment variables (see repo `.env.example`):
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
 
+from config import Settings
 from db.mongo import ensure_indexes
 from routes import pipelines, reports
 
+logger = logging.getLogger(__name__)
 
-class Settings(BaseSettings):
-    """Loads from environment and optional `.env` next to this file or repo root."""
+# Local dev + Vercel preview/production frontends.
+_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+_CORS_ORIGIN_REGEX = r"https://.*\.vercel\.app"
 
-    model_config = SettingsConfigDict(
-        env_file=(".env", "../.env"),
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
+_MONGO_TIMEOUT_MS = 5_000
 
-    mongodb_uri: str
-    mongodb_db_name: str = "datapilot"
+
+def _connect_mongodb(settings: Settings) -> tuple[MongoClient[Any] | None, Any | None, bool]:
+    """Return (client, database, connected). Does not raise on connection failure."""
+    client: MongoClient[Any] | None = None
+    try:
+        client = MongoClient(
+            settings.mongodb_uri,
+            serverSelectionTimeoutMS=_MONGO_TIMEOUT_MS,
+            connectTimeoutMS=_MONGO_TIMEOUT_MS,
+        )
+        client.admin.command("ping")
+        db = client[settings.mongodb_db_name]
+        ensure_indexes(db)
+        logger.info("Connected to MongoDB database %r", settings.mongodb_db_name)
+        return client, db, True
+    except (ServerSelectionTimeoutError, PyMongoError, OSError) as exc:
+        logger.warning("MongoDB unavailable at startup: %s", exc)
+        if client is not None:
+            client.close()
+        return None, None, False
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = Settings()
-    client: MongoClient[Any] = MongoClient(settings.mongodb_uri)
-    db = client[settings.mongodb_db_name]
+    client, db, mongo_connected = _connect_mongodb(settings)
+    app.state.settings = settings
     app.state.mongo_client = client
     app.state.db = db
-    ensure_indexes(db)
+    app.state.mongo_connected = mongo_connected
     yield
-    client.close()
+    if client is not None:
+        client.close()
 
 
 app = FastAPI(
@@ -60,7 +82,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_CORS_ORIGINS,
+    allow_origin_regex=_CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,13 +110,17 @@ def agent_stub(body: AgentMessage) -> AgentReply:
     return AgentReply(
         reply=(
             "Datapilot agent (stub): received your message. "
-            f"When the live agent is connected, I will answer about pipelines and incidents. "
+            "When the live agent is connected, I will answer about pipelines and incidents. "
             f"You asked: {snippet!r}"
         )
     )
 
 
 @app.get("/health")
-def health_check() -> dict[str, str]:
+def health_check(request: Request) -> dict[str, str]:
     """Liveness probe for deploy targets."""
-    return {"status": "ok"}
+    mongo_connected = bool(getattr(request.app.state, "mongo_connected", False))
+    return {
+        "status": "ok" if mongo_connected else "degraded",
+        "mongodb": "connected" if mongo_connected else "unavailable",
+    }

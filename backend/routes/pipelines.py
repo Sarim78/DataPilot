@@ -97,7 +97,13 @@ class PipelineHealth(BaseModel):
 
 
 def get_mongo_db(request: Request) -> Database[Any]:
-    return request.app.state.db
+    db = getattr(request.app.state, "db", None)
+    if db is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database is temporarily unavailable. Check MONGODB_URI and Atlas connectivity.",
+        )
+    return db
 
 
 MongoDb = Annotated[Database[Any], Depends(get_mongo_db)]
