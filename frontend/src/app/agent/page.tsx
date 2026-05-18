@@ -3,9 +3,8 @@
 import { AgentChat } from "@/components/AgentChat";
 import { SidebarLayout } from "@/components/StatusBadge";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ??
-  "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function AgentPage() {
   return (
@@ -18,7 +17,7 @@ export default function AgentPage() {
           </p>
         </div>
         <div className="flex-1 overflow-hidden">
-          <AgentChat apiBase={API_BASE} />
+          <AgentChat apiBase={API_URL} />
         </div>
       </div>
     </SidebarLayout>

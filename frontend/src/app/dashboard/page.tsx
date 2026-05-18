@@ -9,9 +9,8 @@ import {
 } from "@/components/PipelineCard";
 import { SidebarLayout } from "@/components/StatusBadge";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ??
-  "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function isWithinLast24h(iso: string | null | undefined): boolean {
   if (!iso) return false;
@@ -65,7 +64,7 @@ export default function DashboardPage() {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const listRes = await fetch(`${API_BASE}/api/pipelines`);
+      const listRes = await fetch(`${API_URL}/api/pipelines`);
       if (!listRes.ok) {
         throw new Error(await readErrorMessage(listRes));
       }
@@ -80,7 +79,7 @@ export default function DashboardPage() {
 
       const healthResults = await Promise.all(
         list.map(async (p) => {
-          const res = await fetch(`${API_BASE}/api/pipelines/${p.id}/health`);
+          const res = await fetch(`${API_URL}/api/pipelines/${p.id}/health`);
           if (!res.ok) {
             throw new Error(
               `Health for ${p.name}: ${await readErrorMessage(res)}`,
@@ -99,7 +98,7 @@ export default function DashboardPage() {
       const runsResults = await Promise.all(
         list.map(async (p) => {
           const res = await fetch(
-            `${API_BASE}/api/pipelines/${p.id}/runs?limit=80`,
+            `${API_URL}/api/pipelines/${p.id}/runs?limit=80`,
           );
           if (!res.ok) {
             throw new Error(
@@ -233,7 +232,7 @@ export default function DashboardPage() {
                   key={p.id}
                   pipeline={p}
                   health={h}
-                  apiBase={API_BASE}
+                  apiBase={API_URL}
                   onReportsChanged={bump}
                 />
               );
