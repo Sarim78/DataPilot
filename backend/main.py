@@ -7,7 +7,7 @@ Run from the `backend/` directory:
 
 Environment variables (see repo `.env.example`):
 
-    MONGODB_URI       — required
+    MONGODB_URI — required
     MONGODB_DB_NAME   — optional, default `datapilot`
 """
 
