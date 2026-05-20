@@ -1,11 +1,9 @@
 # Datapilot 🚀
 
-> **🏆 Built as a hackathon project**
+> **Built for the Google Cloud Rapid Agent Hackathon**
 
 Datapilot is an AI-powered data pipeline monitoring agent. It watches your ETL pipelines, detects failures and anomalies, and automatically generates incident reports all powered by Gemini and Google Cloud Agent Builder with MongoDB as the data backbone.
 
----
->🔴 Work In Progress 
 ---
 
 ## What It Does
@@ -22,7 +20,7 @@ Datapilot is an AI-powered data pipeline monitoring agent. It watches your ETL p
 
 | Layer | Tool |
 |---|---|
-| Agent | Gemini + Google Cloud Agent Builder |
+| Agent | Gemini 2.5 Flash + Google ADK |
 | Database | MongoDB Atlas |
 | Backend | Python (FastAPI) |
 | Frontend | Next.js |
@@ -44,14 +42,14 @@ cp .env.example .env
 
 | Variable | Where to get it |
 |---|---|
-| `GOOGLE_API_KEY` | [Google AI Studio](https://aistudio.google.com/) |
+| `GOOGLE_API_KEY` | [Google AI Studio](https://aistudio.google.com/) - use a personal Gmail account for free tier |
 | `GOOGLE_CLOUD_PROJECT` | [Google Cloud Console](https://console.cloud.google.com/) |
 | `MONGODB_URI` | [MongoDB Atlas](https://www.mongodb.com/atlas) - free M0 tier works |
+| `GEMINI_MODEL` | Set to `gemini-2.5-flash` |
 
 ### How to stay on the free tier:
 
-- **Google Cloud** - new accounts get $300 in free credits. Set a billing alert at $5-$10 so you are never surprised
-- **Gemini API** - use `gemini-1.5-flash` (free tier) not Pro or Ultra
+- **Google AI Studio** - sign up with a personal Gmail to get the free tier automatically
 - **MongoDB** - use the M0 free cluster (512MB, no credit card required)
 - **Vercel + Railway** - both have free tiers sufficient for a demo
 
@@ -66,7 +64,7 @@ cp .env.example .env
 - Python 3.10+
 - Node.js 18+
 - A MongoDB Atlas account (free)
-- A Google Cloud account (free $300 credits for new accounts)
+- A Google AI Studio account (free tier)
 
 ### Backend
 
@@ -74,7 +72,7 @@ cp .env.example .env
 cd backend
 pip install -r requirements.txt
 cp ../.env.example ../.env   # fill in your keys
-python main.py
+uvicorn main:app --reload
 ```
 
 ### Seed demo data
@@ -82,6 +80,13 @@ python main.py
 ```bash
 cd data
 python seed.py
+```
+
+### Agent
+
+```bash
+pip install google-adk mcp
+adk run agent
 ```
 
 ### Frontend
@@ -101,8 +106,11 @@ datapilot/
 ├── .env.example
 ├── .gitignore
 ├── LICENSE
+├── Procfile
 ├── README.md
+├── requirements.txt
 ├── agent/
+│   ├── agent.py
 │   ├── agent.yaml
 │   ├── tools.yaml
 │   └── prompts/
@@ -112,8 +120,7 @@ datapilot/
 │   ├── requirements.txt
 │   ├── config.py
 │   ├── db/
-│   │   ├── mongo.py
-│   │   └── models.py
+│   │   └── mongo.py
 │   ├── routes/
 │   │   ├── pipelines.py
 │   │   └── reports.py
@@ -127,25 +134,11 @@ datapilot/
 ├── data/
 │   └── seed.py
 └── docs/
-    ├── architecture.png
     └── demo-script.md
 ```
 
 ---
 
-## Hackathon
-
-This project was built for the [Google Cloud Rapid Agent Hackathon](https://rapid-agent.devpost.com/) hosted on Devpost.
-
-- **Track**: MongoDB
-- **Theme**: Building Agents for Real-World Challenges
-
----
-
 ## License
 
-MIT License.
-
----
-
-*Built for the hackathon: DataPilot team 🚀*
+MIT License
