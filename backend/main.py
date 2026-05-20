@@ -13,8 +13,8 @@ Environment variables (see repo `.env.example`):
 
 from __future__ import annotations
 
-import importlib.util
 import logging
+import sys
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -45,24 +45,26 @@ _CORS_ORIGIN_REGEX = r"https://.*\.vercel\.app"
 
 _MONGO_TIMEOUT_MS = 5_000
 _AGENT_APP_NAME = "datapilot"
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-_AGENT_MODULE_PATH = _REPO_ROOT / "agent" / "agent.py"
+_REPO_ROOT = Path(__file__).parent.parent
+_repo_root_str = str(_REPO_ROOT.resolve())
+if _repo_root_str not in sys.path:
+    sys.path.insert(0, _repo_root_str)
 _root_agent: Any | None = None
 
 
 def _get_root_agent() -> Any:
-    """Load `root_agent` from agent/agent.py (lazy, once)."""
+    """Load `root_agent` from agent.agent (lazy, once)."""
     global _root_agent
     if _root_agent is not None:
         return _root_agent
-    if not _AGENT_MODULE_PATH.is_file():
-        raise RuntimeError(f"Agent module not found at {_AGENT_MODULE_PATH}")
-    spec = importlib.util.spec_from_file_location("datapilot_agent", _AGENT_MODULE_PATH)
-    if spec is None or spec.loader is None:
-        raise RuntimeError(f"Cannot load agent module from {_AGENT_MODULE_PATH}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    _root_agent = module.root_agent
+    try:
+        from agent.agent import root_agent as loaded_root_agent
+    except ImportError as exc:
+        raise RuntimeError(
+            f"Agent module not found under repo root {_REPO_ROOT}. "
+            "Expected agent/agent.py."
+        ) from exc
+    _root_agent = loaded_root_agent
     return _root_agent
 
 
